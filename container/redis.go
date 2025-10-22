@@ -2,11 +2,11 @@ package gdcontainer
 
 import (
 	"context"
+	gdconfig "github.com/thinhphamnls/gd/config"
+	gdlogger "github.com/thinhphamnls/gd/logger"
 	"time"
 
 	"github.com/redis/go-redis/v9"
-	"github.com/thinhphamnls/gd/config"
-	"github.com/thinhphamnls/gd/logger"
 	"go.uber.org/zap"
 )
 

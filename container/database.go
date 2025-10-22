@@ -3,13 +3,12 @@ package gdcontainer
 import (
 	"errors"
 	"fmt"
-	gdlogger "github.com/thinhphamnls/gd/logger"
+	"github.com/thinhphamnls/gd/config"
+	"github.com/thinhphamnls/gd/logger"
 	"time"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-
-	"github.com/thinhphamnls/gd/config"
 )
 
 const (
@@ -18,12 +17,12 @@ const (
 
 const (
 	DefaultSchemaGorillaDesk = "gorilladesk"
+	DefaultSchemaEmailInbox  = "public"
 )
 
 type IDataBaseProvider interface {
 	GDMain() *gorm.DB
 	GDSlave() *gorm.DB
-
 	Transaction(fc func(tx *gorm.DB) error) (err error)
 }
 
@@ -121,6 +120,46 @@ func (p *databaseProvider) Transaction(fc func(tx *gorm.DB) error) (err error) {
 	}()
 
 	txRep := p.gdMain
+	txRep = tx
+	err = fc(txRep)
+
+	if err == nil {
+		err = tx.Commit().Error
+	}
+
+	panicked = false
+	return
+}
+
+type IDataBaseInboxProvider interface {
+	InboxMain() *gorm.DB
+	InboxSlave() *gorm.DB
+	Transaction(fc func(tx *gorm.DB) error) (err error)
+}
+
+type databaseInboxProvider struct {
+	inboxMain, inboxSlave *gorm.DB
+}
+
+func (p *databaseInboxProvider) InboxMain() *gorm.DB {
+	return p.inboxMain.Session(&gorm.Session{SkipHooks: false})
+}
+
+func (p *databaseInboxProvider) InboxSlave() *gorm.DB {
+	return p.inboxSlave.Session(&gorm.Session{SkipHooks: false})
+}
+
+func (p *databaseInboxProvider) Transaction(fc func(tx *gorm.DB) error) (err error) {
+	panicked := true
+	tx := p.inboxMain.Begin()
+
+	defer func() {
+		if panicked || err != nil {
+			tx.Rollback()
+		}
+	}()
+
+	txRep := p.inboxMain
 	txRep = tx
 	err = fc(txRep)
 

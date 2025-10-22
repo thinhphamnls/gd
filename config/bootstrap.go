@@ -1,16 +1,6 @@
 package gdconfig
 
-import (
-	"strings"
-
-	"github.com/spf13/viper"
-)
-
 const ProductionEnv = "production"
-
-var (
-	cf Config
-)
 
 type IConfig interface {
 	GetServer() Server
@@ -99,48 +89,4 @@ func (c Config) GetTime() Time {
 
 func (c Config) GetQueue() Queue {
 	return c.Queue
-}
-
-func EnvHttp() {
-	cf.Server.Env.Mode = viper.GetString("SERVER_MODE")
-	cf.Server.Http.Address = viper.GetString("SERVER_HTTP_ADDRESS")
-	cf.Server.Http.Timeout = viper.GetInt("SERVER_HTTP_TIMEOUT")
-}
-
-func EnvRedis() {
-	cf.Cache.Redis.Host = viper.GetString("CACHE_REDIS_HOST")
-	cf.Cache.Redis.Port = viper.GetString("CACHE_REDIS_PORT")
-	cf.Cache.Redis.Password = viper.GetString("CACHE_REDIS_PASSWORD")
-	cf.Cache.Redis.Db = viper.GetInt("CACHE_REDIS_DB")
-	cf.Cache.Redis.DialTimeout = viper.GetInt("CACHE_REDIS_DIAL_TIMEOUT")
-	cf.Cache.Redis.ReadTimeout = viper.GetInt("CACHE_REDIS_READ_TIMEOUT")
-	cf.Cache.Redis.WriteTimeout = viper.GetInt("CACHE_REDIS_WRITE_TIMEOUT")
-}
-
-func EnvDatabase() {
-	cf.Database.GDMain.Host = viper.GetString("DATABASE_GD_MAIN_HOST")
-	cf.Database.GDMain.Port = viper.GetString("DATABASE_GD_MAIN_PORT")
-	cf.Database.GDMain.DBName = viper.GetString("DATABASE_GD_MAIN_DB_NAME")
-	cf.Database.GDMain.Username = viper.GetString("DATABASE_GD_MAIN_USERNAME")
-	cf.Database.GDMain.Password = viper.GetString("DATABASE_GD_MAIN_PASSWORD")
-	cf.Database.GDMain.MaxCon = viper.GetInt("DATABASE_GD_MAIN_MAX_CON")
-	cf.Database.GDMain.MaxIdleCon = viper.GetInt("DATABASE_GD_MAIN_MAX_IDLE_CON")
-
-	cf.Database.GDSlave.Host = viper.GetString("DATABASE_GD_SLAVE_HOST")
-	cf.Database.GDSlave.Port = viper.GetString("DATABASE_GD_SLAVE_PORT")
-	cf.Database.GDSlave.DBName = viper.GetString("DATABASE_GD_SLAVE_DB_NAME")
-	cf.Database.GDSlave.Username = viper.GetString("DATABASE_GD_SLAVE_USERNAME")
-	cf.Database.GDSlave.Password = viper.GetString("DATABASE_GD_SLAVE_PASSWORD")
-	cf.Database.GDSlave.MaxCon = viper.GetInt("DATABASE_GD_SLAVE_MAX_CON")
-	cf.Database.GDSlave.MaxIdleCon = viper.GetInt("DATABASE_GD_SLAVE_MAX_IDLE_CON")
-}
-
-func EnvTimer() {
-	cf.Timer.Zone = viper.GetString("TIME_ZONE")
-}
-
-func EnvQueue() {
-	cf.Queue.Brokers = strings.Split(viper.GetString("QUEUE_BROKERS"), ",")
-	cf.Queue.Topic = viper.GetString("QUEUE_TOPIC")
-	cf.Queue.GroupId = viper.GetString("QUEUE_GROUP_ID")
 }

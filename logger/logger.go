@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/thinhphamnls/gd/config"
 	"log"
 	"time"
 
-	"github.com/thinhphamnls/gd/config"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gorm.io/gorm"

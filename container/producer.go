@@ -1,14 +1,13 @@
-package queue
+package gdcontainer
 
 import (
 	"fmt"
+	"github.com/thinhphamnls/gd/config"
 	"github.com/thinhphamnls/gd/logger"
 	"time"
 
 	"github.com/IBM/sarama"
 	"go.uber.org/zap"
-
-	"github.com/thinhphamnls/gd/config"
 )
 
 type IProducer interface {
@@ -21,7 +20,7 @@ type producer struct {
 	producerClient sarama.SyncProducer
 }
 
-func NewProducer(cf bootstrap.Queue, zap logger.ILogger) (IProducer, error) {
+func NewProducer(cf gdconfig.Queue, zap gdlogger.ILogger) (IProducer, error) {
 	config := sarama.NewConfig()
 	config.Producer.RequiredAcks = sarama.WaitForAll
 	config.Producer.Retry.Max = 10
@@ -30,7 +29,7 @@ func NewProducer(cf bootstrap.Queue, zap logger.ILogger) (IProducer, error) {
 
 	producerClient, err := sarama.NewSyncProducer(cf.Brokers, config)
 	if err != nil {
-		return nil, fmt.Errorf("producer client init fail, %s", err)
+		return nil, fmt.Errorf("producer client init failed: %s", err)
 	}
 
 	return producer{
