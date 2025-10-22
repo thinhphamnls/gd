@@ -1,14 +1,13 @@
-package container
+package gdcontainer
 
 import (
 	"context"
 	"time"
 
 	"github.com/redis/go-redis/v9"
+	"github.com/thinhphamnls/gd/config"
+	"github.com/thinhphamnls/gd/logger"
 	"go.uber.org/zap"
-
-	"sync-quickbooks-v3/config"
-	"sync-quickbooks-v3/logger"
 )
 
 const (
@@ -26,7 +25,7 @@ type redisProvider struct {
 	sugar       *zap.SugaredLogger
 }
 
-func NewRedis(cf bootstrap.Cache, zap logger.ILogger) (IRedisProvider, func(), error) {
+func NewRedis(cf gdconfig.Cache, zap gdlogger.ILogger) (IRedisProvider, func(), error) {
 	var (
 		data    = &redisProvider{sugar: zap.Get()}
 		err     error
@@ -51,7 +50,7 @@ func NewRedis(cf bootstrap.Cache, zap logger.ILogger) (IRedisProvider, func(), e
 	return data, cleanup, nil
 }
 
-func connectRedis(cfRedis bootstrap.Redis) (*redis.Client, error) {
+func connectRedis(cfRedis gdconfig.Redis) (*redis.Client, error) {
 	redisClient := redis.NewClient(&redis.Options{
 		Addr:            cfRedis.Host + ":" + cfRedis.Port,
 		Password:        cfRedis.Password,

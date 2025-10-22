@@ -3,7 +3,6 @@ package gdconfig
 import (
 	"log"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/spf13/viper"
@@ -12,8 +11,7 @@ import (
 const ProductionEnv = "production"
 
 var (
-	once sync.Once
-	cf   Config
+	cf Config
 )
 
 type Config struct {
@@ -77,35 +75,13 @@ type Queue struct {
 	GroupId string
 }
 
-func Init() Config {
-	once.Do(func() {
-		viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-		viper.AutomaticEnv()
-		viper.AddConfigPath(".")
-		viper.SetConfigFile(".env")
-
-		if err := viper.ReadInConfig(); err != nil {
-			log.Fatalf(".env file configs failed: %v", err)
-		}
-
-		envHttp()
-		envRedis()
-		envDatabase()
-		envTimer()
-
-		setTimeZone(cf.Timer.Zone)
-	})
-
-	return cf
-}
-
-func envHttp() {
+func EnvHttp() {
 	cf.Server.Env.Mode = viper.GetString("SERVER_MODE")
 	cf.Server.Http.Address = viper.GetString("SERVER_HTTP_ADDRESS")
 	cf.Server.Http.Timeout = viper.GetInt("SERVER_HTTP_TIMEOUT")
 }
 
-func envRedis() {
+func EnvRedis() {
 	cf.Cache.Redis.Host = viper.GetString("CACHE_REDIS_HOST")
 	cf.Cache.Redis.Port = viper.GetString("CACHE_REDIS_PORT")
 	cf.Cache.Redis.Password = viper.GetString("CACHE_REDIS_PASSWORD")
@@ -115,7 +91,7 @@ func envRedis() {
 	cf.Cache.Redis.WriteTimeout = viper.GetInt("CACHE_REDIS_WRITE_TIMEOUT")
 }
 
-func envDatabase() {
+func EnvDatabase() {
 	cf.Database.GDMain.Host = viper.GetString("DATABASE_GD_MAIN_HOST")
 	cf.Database.GDMain.Port = viper.GetString("DATABASE_GD_MAIN_PORT")
 	cf.Database.GDMain.DBName = viper.GetString("DATABASE_GD_MAIN_DB_NAME")
@@ -133,8 +109,14 @@ func envDatabase() {
 	cf.Database.GDSlave.MaxIdleCon = viper.GetInt("DATABASE_GD_SLAVE_MAX_IDLE_CON")
 }
 
-func envTimer() {
+func EnvTimer() {
 	cf.Timer.Zone = viper.GetString("TIME_ZONE")
+}
+
+func EnvQueue() {
+	cf.Queue.Brokers = strings.Split(viper.GetString("QUEUE_BROKERS"), ",")
+	cf.Queue.Topic = viper.GetString("QUEUE_TOPIC")
+	cf.Queue.GroupId = viper.GetString("QUEUE_GROUP_ID")
 }
 
 func setTimeZone(timeZone string) {

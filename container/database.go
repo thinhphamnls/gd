@@ -1,15 +1,15 @@
-package container
+package gdcontainer
 
 import (
 	"errors"
 	"fmt"
+	gdlogger "github.com/thinhphamnls/gd/logger"
 	"time"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
 	"github.com/thinhphamnls/gd/config"
-	"github.com/thinhphamnls/gd/logger"
 )
 
 const (
@@ -31,7 +31,7 @@ type databaseProvider struct {
 	gdMain, gdSlave *gorm.DB
 }
 
-func NewDatabase(cf gdconfig.Database, zap logger.ILogger) (IDataBaseProvider, func(), error) {
+func NewDatabase(cf gdconfig.Database, zap gdlogger.ILogger) (IDataBaseProvider, func(), error) {
 	var (
 		data = &databaseProvider{}
 
@@ -74,7 +74,7 @@ func NewDatabase(cf gdconfig.Database, zap logger.ILogger) (IDataBaseProvider, f
 	return data, cleanup, nil
 }
 
-func connect(cf gdconfig.DbConfig, zap logger.ILogger) (*gorm.DB, error) {
+func connect(cf gdconfig.DbConfig, zap gdlogger.ILogger) (*gorm.DB, error) {
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=UTC",
 		cf.Host, cf.Username, cf.Password, cf.DBName, cf.Port)
 

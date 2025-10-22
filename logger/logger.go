@@ -1,4 +1,4 @@
-package logger
+package gdlogger
 
 import (
 	"context"
@@ -7,13 +7,12 @@ import (
 	"log"
 	"time"
 
+	"github.com/thinhphamnls/gd/config"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gorm.io/gorm"
 	gormLogger "gorm.io/gorm/logger"
 	gormUtils "gorm.io/gorm/utils"
-
-	"github.com/thinhphamnls/gd/config"
 )
 
 const (
@@ -38,21 +37,21 @@ type logger struct {
 	Zap *zap.SugaredLogger
 }
 
-func Init(config bootstrap.Config) ILogger {
-	zapLogger, err := build(config)
+func Init(cf gdconfig.Config) ILogger {
+	zapLogger, err := build(cf)
 	defer func() {
 		_ = zapLogger.Sync()
 	}()
 
 	if err != nil {
-		log.Fatalf("error init zap logger: %v", err)
+		log.Fatalf("init zap logger failed: %v", err)
 	}
 
 	return &logger{Zap: zapLogger.Sugar()}
 }
 
-func build(config bootstrap.Config) (*zap.Logger, error) {
-	env := config.Server.Env
+func build(cf gdconfig.Config) (*zap.Logger, error) {
+	env := cf.Server.Env
 
 	// configs default
 	cfg := zap.Config{
@@ -74,9 +73,8 @@ func build(config bootstrap.Config) (*zap.Logger, error) {
 		},
 	}
 
-	if env.Mode != bootstrap.ProductionEnv {
+	if env.Mode != gdconfig.ProductionEnv {
 		cfg.Level = zap.NewAtomicLevelAt(zapcore.InfoLevel)
-		//cfg.EncoderConfig.FunctionKey = "func"
 	}
 
 	zapLogger, err := cfg.Build()
