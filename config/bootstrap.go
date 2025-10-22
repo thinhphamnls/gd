@@ -1,9 +1,7 @@
 package gdconfig
 
 import (
-	"log"
 	"strings"
-	"time"
 
 	"github.com/spf13/viper"
 )
@@ -13,6 +11,14 @@ const ProductionEnv = "production"
 var (
 	cf Config
 )
+
+type IConfig interface {
+	GetServer() Server
+	GetDatabase() Database
+	GetCache() Cache
+	GetTime() Time
+	GetQueue() Queue
+}
 
 type Config struct {
 	Server   Server
@@ -75,6 +81,26 @@ type Queue struct {
 	GroupId string
 }
 
+func (c Config) GetServer() Server {
+	return c.Server
+}
+
+func (c Config) GetDatabase() Database {
+	return c.Database
+}
+
+func (c Config) GetCache() Cache {
+	return c.Cache
+}
+
+func (c Config) GetTime() Time {
+	return c.Timer
+}
+
+func (c Config) GetQueue() Queue {
+	return c.Queue
+}
+
 func EnvHttp() {
 	cf.Server.Env.Mode = viper.GetString("SERVER_MODE")
 	cf.Server.Http.Address = viper.GetString("SERVER_HTTP_ADDRESS")
@@ -117,12 +143,4 @@ func EnvQueue() {
 	cf.Queue.Brokers = strings.Split(viper.GetString("QUEUE_BROKERS"), ",")
 	cf.Queue.Topic = viper.GetString("QUEUE_TOPIC")
 	cf.Queue.GroupId = viper.GetString("QUEUE_GROUP_ID")
-}
-
-func setTimeZone(timeZone string) {
-	loc, err := time.LoadLocation(timeZone)
-	if err != nil {
-		log.Fatalf("error loading timezone, %v", err)
-	}
-	time.Local = loc
 }
