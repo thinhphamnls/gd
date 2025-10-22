@@ -30,7 +30,7 @@ func (p BaseContainerProvider) QueueProvider() queue.IProducer {
 	return p.queueProvider
 }
 
-func buildDatabase(cf bootstrap.Config, zap logger.ILogger) IDataBaseProvider {
+func buildDatabase(cf gdconfig.Config, zap logger.ILogger) IDataBaseProvider {
 	database, cleanup, err := NewDatabase(cf.Database, zap)
 	if err != nil {
 		cleanup()
@@ -40,7 +40,7 @@ func buildDatabase(cf bootstrap.Config, zap logger.ILogger) IDataBaseProvider {
 	return database
 }
 
-func buildRedis(cf bootstrap.Config, zap logger.ILogger) IRedisProvider {
+func buildRedis(cf gdconfig.Config, zap logger.ILogger) IRedisProvider {
 	redis, cleanup, err := NewRedis(cf.Cache, zap)
 	if err != nil {
 		cleanup()
@@ -50,7 +50,7 @@ func buildRedis(cf bootstrap.Config, zap logger.ILogger) IRedisProvider {
 	return redis
 }
 
-func buildQueue(cf bootstrap.Config, zap logger.ILogger) queue.IProducer {
+func buildQueue(cf gdconfig.Config, zap logger.ILogger) queue.IProducer {
 	queueClient, err := queue.NewProducer(cf.Queue, zap)
 	if err != nil {
 		zap.Get().Fatalf("init queue failed: %v", err)

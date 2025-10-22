@@ -8,8 +8,8 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
-	"sync-quickbooks-v3/config"
-	"sync-quickbooks-v3/logger"
+	"github.com/thinhphamnls/gd/config"
+	"github.com/thinhphamnls/gd/logger"
 )
 
 const (
@@ -28,16 +28,15 @@ type IDataBaseProvider interface {
 }
 
 type databaseProvider struct {
-	gdMain, gdSlave       *gorm.DB
-	emailMain, emailSlave *gorm.DB
+	gdMain, gdSlave *gorm.DB
 }
 
-func NewDatabase(config bootstrap.Database, zap logger.ILogger) (IDataBaseProvider, func(), error) {
+func NewDatabase(cf gdconfig.Database, zap logger.ILogger) (IDataBaseProvider, func(), error) {
 	var (
 		data = &databaseProvider{}
 
-		cfGDMain  = config.GDMain
-		cfGDSlave = config.GDSlave
+		cfGDMain  = cf.GDMain
+		cfGDSlave = cf.GDSlave
 
 		err error
 	)
@@ -75,7 +74,7 @@ func NewDatabase(config bootstrap.Database, zap logger.ILogger) (IDataBaseProvid
 	return data, cleanup, nil
 }
 
-func connect(cf bootstrap.DbConfig, zap logger.ILogger) (*gorm.DB, error) {
+func connect(cf gdconfig.DbConfig, zap logger.ILogger) (*gorm.DB, error) {
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=UTC",
 		cf.Host, cf.Username, cf.Password, cf.DBName, cf.Port)
 

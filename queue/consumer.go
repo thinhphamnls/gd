@@ -3,10 +3,11 @@ package queue
 import (
 	"context"
 	"fmt"
-	"github.com/thinhphamnls/gd/config"
 
 	"github.com/IBM/sarama"
 	"go.uber.org/zap"
+
+	"github.com/thinhphamnls/gd/config"
 )
 
 type IConsumer interface {
@@ -20,7 +21,7 @@ type consumer struct {
 	topics        []string
 }
 
-func NewConsumer(cf bootstrap.Queue, sugar *zap.SugaredLogger) (IConsumer, error) {
+func NewConsumer(cf gdconfig.Queue, sugar *zap.SugaredLogger) (IConsumer, error) {
 	if len(cf.Brokers) == 0 {
 		return nil, fmt.Errorf("broker list is empty")
 	}

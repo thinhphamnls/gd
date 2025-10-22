@@ -1,7 +1,6 @@
-package bootstrap
+package gdconfig
 
 import (
-	"fmt"
 	"log"
 	"strings"
 	"sync"
@@ -18,12 +17,11 @@ var (
 )
 
 type Config struct {
-	Server    Server
-	Database  Database
-	Cache     Cache
-	Timer     Time
-	Queue     Queue
-	QuickBook QuickBook
+	Server   Server
+	Database Database
+	Cache    Cache
+	Timer    Time
+	Queue    Queue
 }
 
 type Server struct {
@@ -69,23 +67,14 @@ type Redis struct {
 	WriteTimeout int
 }
 
+type Time struct {
+	Zone string
+}
+
 type Queue struct {
 	Brokers []string
 	Topic   string
 	GroupId string
-}
-
-type QuickBook struct {
-	ClientId      string
-	ClientSecret  string
-	Scopes        []string
-	Version       string
-	UrlProduction string
-	UrlSandbox    string
-}
-
-type Time struct {
-	Zone string
 }
 
 func Init() Config {
@@ -103,31 +92,6 @@ func Init() Config {
 		envRedis()
 		envDatabase()
 		envTimer()
-		envQueue()
-		envQuickBook()
-
-		setTimeZone(cf.Timer.Zone)
-	})
-
-	return cf
-}
-
-func InitTest(path string) Config {
-	once.Do(func() {
-		viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-		viper.AutomaticEnv()
-		viper.SetConfigFile(fmt.Sprintf("%s/.env", path))
-
-		if err := viper.ReadInConfig(); err != nil {
-			log.Fatalf(".env file configs failed: %v", err)
-		}
-
-		envHttp()
-		envRedis()
-		envDatabase()
-		envTimer()
-		envQueue()
-		envQuickBook()
 
 		setTimeZone(cf.Timer.Zone)
 	})
@@ -171,21 +135,6 @@ func envDatabase() {
 
 func envTimer() {
 	cf.Timer.Zone = viper.GetString("TIME_ZONE")
-}
-
-func envQueue() {
-	cf.Queue.Brokers = strings.Split(viper.GetString("QUEUE_BROKERS"), ",")
-	cf.Queue.Topic = viper.GetString("QUEUE_TOPIC")
-	cf.Queue.GroupId = viper.GetString("QUEUE_GROUP_ID")
-}
-
-func envQuickBook() {
-	cf.QuickBook.ClientId = viper.GetString("QB_CLIENT_ID")
-	cf.QuickBook.ClientSecret = viper.GetString("QB_CLIENT_SECRET")
-	cf.QuickBook.Scopes = strings.Split(viper.GetString("QB_SCOPES"), ",")
-	cf.QuickBook.Version = viper.GetString("QB_VERSION")
-	cf.QuickBook.UrlSandbox = viper.GetString("QB_URL_SANDBOX")
-	cf.QuickBook.UrlProduction = viper.GetString("QB_URL_PROD")
 }
 
 func setTimeZone(timeZone string) {
