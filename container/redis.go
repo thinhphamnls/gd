@@ -2,12 +2,13 @@ package gdcontainer
 
 import (
 	"context"
-	gdconfig "github.com/thinhphamnls/gd/config"
-	gdlogger "github.com/thinhphamnls/gd/logger"
 	"time"
 
 	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
+
+	"github.com/thinhphamnls/gd/config"
+	"github.com/thinhphamnls/gd/logger"
 )
 
 const (
@@ -25,11 +26,11 @@ type redisProvider struct {
 	sugar       *zap.SugaredLogger
 }
 
-func NewRedis(cf gdconfig.Cache, zap gdlogger.ILogger) (IRedisProvider, func(), error) {
+func NewRedis(cf gdconfig.IBaseConfig, zap gdlogger.IBaseLogger) (IRedisProvider, func(), error) {
 	var (
 		data    = &redisProvider{sugar: zap.Get()}
 		err     error
-		cfRedis = cf.Redis
+		cfRedis = cf.GetCache()
 	)
 
 	cleanup := func() {
@@ -40,8 +41,8 @@ func NewRedis(cf gdconfig.Cache, zap gdlogger.ILogger) (IRedisProvider, func(), 
 		zap.Get().Info("cleanup and close redis")
 	}
 
-	if cfRedis.Host != "" {
-		data.redisClient, err = connectRedis(cfRedis)
+	if cfRedis.Redis.Host != "" {
+		data.redisClient, err = connectRedis(cfRedis.Redis)
 		if err != nil {
 			return nil, cleanup, err
 		}

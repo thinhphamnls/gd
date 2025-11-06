@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/thinhphamnls/gd/config"
 	"log"
 	"time"
 
@@ -13,6 +12,8 @@ import (
 	"gorm.io/gorm"
 	gormLogger "gorm.io/gorm/logger"
 	gormUtils "gorm.io/gorm/utils"
+
+	"github.com/thinhphamnls/gd/config"
 )
 
 const (
@@ -24,7 +25,7 @@ const (
 	slowThreshold = 2000
 )
 
-type ILogger interface {
+type IBaseLogger interface {
 	Get() *zap.SugaredLogger
 	LogMode(level gormLogger.LogLevel) gormLogger.Interface
 	Info(ctx context.Context, msg string, data ...interface{})
@@ -33,11 +34,11 @@ type ILogger interface {
 	Trace(ctx context.Context, begin time.Time, fc func() (string, int64), err error)
 }
 
-type logger struct {
+type BaseLogger struct {
 	Zap *zap.SugaredLogger
 }
 
-func Init(cf gdconfig.IConfig) ILogger {
+func Init(cf gdconfig.IBaseConfig) IBaseLogger {
 	zapLogger, err := build(cf)
 	defer func() {
 		_ = zapLogger.Sync()
@@ -47,11 +48,11 @@ func Init(cf gdconfig.IConfig) ILogger {
 		log.Fatalf("init zap logger failed: %v", err)
 	}
 
-	return &logger{Zap: zapLogger.Sugar()}
+	return &BaseLogger{Zap: zapLogger.Sugar()}
 }
 
-func build(cf gdconfig.IConfig) (*zap.Logger, error) {
-	env := cf.GetServer().Env
+func build(cf gdconfig.IBaseConfig) (*zap.Logger, error) {
+	env := cf.GetEnv()
 
 	// configs default
 	cfg := zap.Config{
@@ -73,7 +74,7 @@ func build(cf gdconfig.IConfig) (*zap.Logger, error) {
 		},
 	}
 
-	if env.Mode != gdconfig.ProductionEnv {
+	if env.Mode != "production" {
 		cfg.Level = zap.NewAtomicLevelAt(zapcore.InfoLevel)
 	}
 
@@ -81,27 +82,27 @@ func build(cf gdconfig.IConfig) (*zap.Logger, error) {
 	return zapLogger, err
 }
 
-func (l logger) Get() *zap.SugaredLogger {
+func (l BaseLogger) Get() *zap.SugaredLogger {
 	return l.Zap
 }
 
-func (l logger) LogMode(_ gormLogger.LogLevel) gormLogger.Interface {
+func (l BaseLogger) LogMode(_ gormLogger.LogLevel) gormLogger.Interface {
 	return l
 }
 
-func (l logger) Info(_ context.Context, msg string, data ...interface{}) {
+func (l BaseLogger) Info(_ context.Context, msg string, data ...interface{}) {
 	l.Zap.Infof(messageFormat, append([]interface{}{msg, gormUtils.FileWithLineNum()}, data...)...)
 }
 
-func (l logger) Warn(_ context.Context, msg string, data ...interface{}) {
+func (l BaseLogger) Warn(_ context.Context, msg string, data ...interface{}) {
 	l.Zap.Warnf(messageFormat, append([]interface{}{msg, gormUtils.FileWithLineNum()}, data...)...)
 }
 
-func (l logger) Error(_ context.Context, msg string, data ...interface{}) {
+func (l BaseLogger) Error(_ context.Context, msg string, data ...interface{}) {
 	l.Zap.Errorf(messageFormat, append([]interface{}{msg, gormUtils.FileWithLineNum()}, data...)...)
 }
 
-func (l logger) Trace(_ context.Context, begin time.Time, fc func() (string, int64), err error) {
+func (l BaseLogger) Trace(_ context.Context, begin time.Time, fc func() (string, int64), err error) {
 	elapsed := time.Since(begin)
 
 	switch {

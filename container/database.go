@@ -3,10 +3,10 @@ package gdcontainer
 import (
 	"errors"
 	"fmt"
-	"github.com/thinhphamnls/gd/config"
-	"github.com/thinhphamnls/gd/logger"
 	"time"
 
+	gdconfig "github.com/thinhphamnls/gd/config"
+	gdlogger "github.com/thinhphamnls/gd/logger"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -17,7 +17,6 @@ const (
 
 const (
 	DefaultSchemaGorillaDesk = "gorilladesk"
-	DefaultSchemaEmailInbox  = "public"
 )
 
 type IDataBaseProvider interface {
@@ -30,12 +29,12 @@ type databaseProvider struct {
 	gdMain, gdSlave *gorm.DB
 }
 
-func NewDatabase(cf gdconfig.Database, zap gdlogger.ILogger) (IDataBaseProvider, func(), error) {
+func NewDatabase(cf gdconfig.IBaseConfig, zap gdlogger.IBaseLogger) (IDataBaseProvider, func(), error) {
 	var (
 		data = &databaseProvider{}
 
-		cfGDMain  = cf.GDMain
-		cfGDSlave = cf.GDSlave
+		cfGDMain  = cf.GetDatabase().GDMain
+		cfGDSlave = cf.GetDatabase().GDSlave
 
 		err error
 	)
@@ -73,7 +72,7 @@ func NewDatabase(cf gdconfig.Database, zap gdlogger.ILogger) (IDataBaseProvider,
 	return data, cleanup, nil
 }
 
-func connect(cf gdconfig.DbConfig, zap gdlogger.ILogger) (*gorm.DB, error) {
+func connect(cf gdconfig.DbConfig, zap gdlogger.IBaseLogger) (*gorm.DB, error) {
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=UTC",
 		cf.Host, cf.Username, cf.Password, cf.DBName, cf.Port)
 
@@ -120,46 +119,6 @@ func (p *databaseProvider) Transaction(fc func(tx *gorm.DB) error) (err error) {
 	}()
 
 	txRep := p.gdMain
-	txRep = tx
-	err = fc(txRep)
-
-	if err == nil {
-		err = tx.Commit().Error
-	}
-
-	panicked = false
-	return
-}
-
-type IDataBaseInboxProvider interface {
-	InboxMain() *gorm.DB
-	InboxSlave() *gorm.DB
-	Transaction(fc func(tx *gorm.DB) error) (err error)
-}
-
-type databaseInboxProvider struct {
-	inboxMain, inboxSlave *gorm.DB
-}
-
-func (p *databaseInboxProvider) InboxMain() *gorm.DB {
-	return p.inboxMain.Session(&gorm.Session{SkipHooks: false})
-}
-
-func (p *databaseInboxProvider) InboxSlave() *gorm.DB {
-	return p.inboxSlave.Session(&gorm.Session{SkipHooks: false})
-}
-
-func (p *databaseInboxProvider) Transaction(fc func(tx *gorm.DB) error) (err error) {
-	panicked := true
-	tx := p.inboxMain.Begin()
-
-	defer func() {
-		if panicked || err != nil {
-			tx.Rollback()
-		}
-	}()
-
-	txRep := p.inboxMain
 	txRep = tx
 	err = fc(txRep)
 

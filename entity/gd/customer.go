@@ -18,7 +18,7 @@ const (
 type CustomerSyncQbType int32
 
 const (
-	CustomerSynQbNotSync      CustomerSyncQbType = 0
-	CustomerSyncQbSyncSuccess CustomerSyncQbType = 1
-	CustomerSyncQbSyncFail    CustomerSyncQbType = 2
+	CustomerSyncQbNotSync CustomerSyncQbType = 0
+	CustomerSyncQbSuccess CustomerSyncQbType = 1
+	CustomerSyncQbFail    CustomerSyncQbType = 2
 )

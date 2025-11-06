@@ -1,35 +1,34 @@
 package gdconfig
 
-const ProductionEnv = "production"
-
-type IConfig interface {
-	GetServer() Server
-	GetDatabase() Database
-	GetCache() Cache
-	GetTime() Time
-	GetQueue() Queue
+type IBaseConfig interface {
+	GetEnv() *Env
+	GetServer() *Server
+	GetDatabase() *Database
+	GetCache() *Cache
+	GetTime() *Time
+	GetQueue() *Queue
 }
 
-type Config struct {
-	Server   Server
-	Database Database
-	Cache    Cache
-	Timer    Time
-	Queue    Queue
+type BaseConfig struct {
+	env      Env
+	server   Server
+	database Database
+	cache    Cache
+	timer    Time
+	queue    Queue
+}
+
+func InitBase() IBaseConfig {
+	return &BaseConfig{}
 }
 
 type Server struct {
-	Env  Env
-	Http Http
+	Address string
+	Timeout int
 }
 
 type Env struct {
 	Mode string
-}
-
-type Http struct {
-	Address string
-	Timeout int
 }
 
 type Database struct {
@@ -71,22 +70,26 @@ type Queue struct {
 	GroupId string
 }
 
-func (c Config) GetServer() Server {
-	return c.Server
+func (c *BaseConfig) GetEnv() *Env {
+	return &c.env
 }
 
-func (c Config) GetDatabase() Database {
-	return c.Database
+func (c *BaseConfig) GetServer() *Server {
+	return &c.server
 }
 
-func (c Config) GetCache() Cache {
-	return c.Cache
+func (c *BaseConfig) GetDatabase() *Database {
+	return &c.database
 }
 
-func (c Config) GetTime() Time {
-	return c.Timer
+func (c *BaseConfig) GetCache() *Cache {
+	return &c.cache
 }
 
-func (c Config) GetQueue() Queue {
-	return c.Queue
+func (c *BaseConfig) GetTime() *Time {
+	return &c.timer
+}
+
+func (c *BaseConfig) GetQueue() *Queue {
+	return &c.queue
 }

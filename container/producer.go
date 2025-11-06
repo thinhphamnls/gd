@@ -2,12 +2,14 @@ package gdcontainer
 
 import (
 	"fmt"
-	"github.com/thinhphamnls/gd/config"
-	"github.com/thinhphamnls/gd/logger"
+	"github.com/google/uuid"
 	"time"
 
 	"github.com/IBM/sarama"
 	"go.uber.org/zap"
+
+	"github.com/thinhphamnls/gd/config"
+	"github.com/thinhphamnls/gd/logger"
 )
 
 type IProducer interface {
@@ -20,14 +22,8 @@ type producer struct {
 	producerClient sarama.SyncProducer
 }
 
-func NewProducer(cf gdconfig.Queue, zap gdlogger.ILogger) (IProducer, error) {
-	config := sarama.NewConfig()
-	config.Producer.RequiredAcks = sarama.WaitForAll
-	config.Producer.Retry.Max = 10
-	config.Producer.Return.Successes = true
-	config.Producer.Return.Errors = true
-
-	producerClient, err := sarama.NewSyncProducer(cf.Brokers, config)
+func NewProducer(cf gdconfig.IBaseConfig, zap gdlogger.IBaseLogger, cfKfk *sarama.Config) (IProducer, error) {
+	producerClient, err := sarama.NewSyncProducer(cf.GetQueue().Brokers, cfKfk)
 	if err != nil {
 		return nil, fmt.Errorf("producer client init failed: %s", err)
 	}
@@ -43,6 +39,9 @@ func (p producer) PushMessage(topic string, mgs string) error {
 		Topic:     topic,
 		Value:     sarama.StringEncoder(mgs),
 		Timestamp: time.Now().UTC(),
+		Headers: []sarama.RecordHeader{
+			{Key: []byte("message_id"), Value: []byte(uuid.NewString())},
+		},
 	}
 
 	partition, offset, err := p.producerClient.SendMessage(message)
