@@ -62,6 +62,7 @@ func connectRedis(cfRedis gdconfig.Redis) (*redis.Client, error) {
 		DialTimeout:     time.Duration(cfRedis.DialTimeout) * time.Second,
 		ReadTimeout:     time.Duration(cfRedis.ReadTimeout) * time.Second,
 		WriteTimeout:    time.Duration(cfRedis.WriteTimeout) * time.Second,
+		DisableIdentity: false,
 	})
 
 	_, err := redisClient.Ping(context.Background()).Result()

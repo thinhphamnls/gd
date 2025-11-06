@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	gdconfig "github.com/thinhphamnls/gd/config"
-	gdlogger "github.com/thinhphamnls/gd/logger"
+	"github.com/thinhphamnls/gd/config"
+	"github.com/thinhphamnls/gd/logger"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
