@@ -5,14 +5,15 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/thinhphamnls/gd/config"
-	"github.com/thinhphamnls/gd/logger"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+
+	"github.com/thinhphamnls/gd/config"
+	"github.com/thinhphamnls/gd/logger"
 )
 
 const (
-	timeMaxLifetime = 3 * 60 * time.Second
+	dbConnMaxLifetime = 3 * time.Minute
 )
 
 const (
@@ -91,7 +92,7 @@ func connect(cf gdconfig.DbConfig, zap gdlogger.IBaseLogger) (*gorm.DB, error) {
 	}
 	sqlDB.SetMaxIdleConns(cf.MaxIdleCon)
 	sqlDB.SetMaxOpenConns(cf.MaxCon)
-	sqlDB.SetConnMaxLifetime(timeMaxLifetime)
+	sqlDB.SetConnMaxLifetime(dbConnMaxLifetime)
 
 	if sqlDB == nil {
 		return nil, errors.New("cannot open connection to database")

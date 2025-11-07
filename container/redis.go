@@ -12,9 +12,9 @@ import (
 )
 
 const (
-	maxRetryBackoff = 30 * time.Second
-	minRetryBackoff = 1 * time.Second
-	maxRetries      = 10
+	redisMaxRetryBackoff = 30 * time.Second
+	redisMinRetryBackoff = 1 * time.Second
+	redisMaxRetries      = 10
 )
 
 type IRedisProvider interface {
@@ -56,13 +56,12 @@ func connectRedis(cfRedis gdconfig.Redis) (*redis.Client, error) {
 		Addr:            cfRedis.Host + ":" + cfRedis.Port,
 		Password:        cfRedis.Password,
 		DB:              cfRedis.Db,
-		MinRetryBackoff: minRetryBackoff,
-		MaxRetryBackoff: maxRetryBackoff,
-		MaxRetries:      maxRetries,
+		MinRetryBackoff: redisMinRetryBackoff,
+		MaxRetryBackoff: redisMaxRetryBackoff,
+		MaxRetries:      redisMaxRetries,
 		DialTimeout:     time.Duration(cfRedis.DialTimeout) * time.Second,
 		ReadTimeout:     time.Duration(cfRedis.ReadTimeout) * time.Second,
 		WriteTimeout:    time.Duration(cfRedis.WriteTimeout) * time.Second,
-		DisableIdentity: false,
 	})
 
 	_, err := redisClient.Ping(context.Background()).Result()

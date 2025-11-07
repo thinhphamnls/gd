@@ -2,10 +2,10 @@ package gdcontainer
 
 import (
 	"fmt"
-	"github.com/google/uuid"
 	"time"
 
 	"github.com/IBM/sarama"
+	"github.com/google/uuid"
 	"go.uber.org/zap"
 
 	"github.com/thinhphamnls/gd/config"
