@@ -1,19 +1,12 @@
 package gdconfig
 
-import "sync"
-
-var (
-	once     sync.Once
-	instance *BaseConfig
-)
-
 type IBaseConfig interface {
-	GetEnv() Env
-	GetServer() Server
-	GetDatabase() Database
-	GetCache() Cache
-	GetTime() Time
-	GetQueue() Queue
+	GetEnv() *Env
+	GetServer() *Server
+	GetDatabase() *Database
+	GetCache() *Cache
+	GetTime() *Time
+	GetQueue() *Queue
 }
 
 type BaseConfig struct {
@@ -25,12 +18,8 @@ type BaseConfig struct {
 	queue    Queue
 }
 
-func Init() IBaseConfig {
-	once.Do(func() {
-		instance = &BaseConfig{}
-	})
-
-	return instance
+func InitBase() IBaseConfig {
+	return &BaseConfig{}
 }
 
 type Server struct {
@@ -81,26 +70,26 @@ type Queue struct {
 	GroupId string
 }
 
-func (c *BaseConfig) GetEnv() Env {
-	return c.env
+func (c *BaseConfig) GetEnv() *Env {
+	return &c.env
 }
 
-func (c *BaseConfig) GetServer() Server {
-	return c.server
+func (c *BaseConfig) GetServer() *Server {
+	return &c.server
 }
 
-func (c *BaseConfig) GetDatabase() Database {
-	return c.database
+func (c *BaseConfig) GetDatabase() *Database {
+	return &c.database
 }
 
-func (c *BaseConfig) GetCache() Cache {
-	return c.cache
+func (c *BaseConfig) GetCache() *Cache {
+	return &c.cache
 }
 
-func (c *BaseConfig) GetTime() Time {
-	return c.timer
+func (c *BaseConfig) GetTime() *Time {
+	return &c.timer
 }
 
-func (c *BaseConfig) GetQueue() Queue {
-	return c.queue
+func (c *BaseConfig) GetQueue() *Queue {
+	return &c.queue
 }
