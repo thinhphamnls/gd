@@ -80,3 +80,22 @@ func (c *BaseConfig) GetDatabase() Database { return c.database }
 func (c *BaseConfig) GetCache() Cache       { return c.cache }
 func (c *BaseConfig) GetTime() Time         { return c.timer }
 func (c *BaseConfig) GetQueue() Queue       { return c.queue }
+
+func (c *BaseConfig) SetEnv(env Env) {
+	c.env = env
+}
+func (c *BaseConfig) SetServer(s Server) {
+	c.server = s
+}
+func (c *BaseConfig) SetDatabase(db Database) {
+	c.database = db
+}
+func (c *BaseConfig) SetCache(cache Cache) {
+	c.cache = cache
+}
+func (c *BaseConfig) SetTime(t Time) {
+	c.timer = t
+}
+func (c *BaseConfig) SetQueue(q Queue) {
+	c.queue = q
+}
