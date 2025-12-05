@@ -4,6 +4,7 @@ import "sync"
 
 var (
 	instance *BaseConfig
+	onceInit sync.Once
 	onceLoad sync.Once
 )
 
@@ -16,8 +17,11 @@ type BaseConfig struct {
 	queue    Queue
 }
 
-func Init() BaseConfig {
-	return BaseConfig{}
+func Init() *BaseConfig {
+	onceInit.Do(func() {
+		instance = &BaseConfig{}
+	})
+	return instance
 }
 
 func Load(f func(c *BaseConfig)) {
