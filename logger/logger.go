@@ -38,7 +38,7 @@ type BaseLogger struct {
 	Zap *zap.SugaredLogger
 }
 
-func Init(cf gdconfig.IBaseConfig) IBaseLogger {
+func Init(cf gdconfig.BaseConfig) IBaseLogger {
 	zapLogger, err := build(cf)
 	defer func() {
 		_ = zapLogger.Sync()
@@ -51,7 +51,7 @@ func Init(cf gdconfig.IBaseConfig) IBaseLogger {
 	return &BaseLogger{Zap: zapLogger.Sugar()}
 }
 
-func build(cf gdconfig.IBaseConfig) (*zap.Logger, error) {
+func build(cf gdconfig.BaseConfig) (*zap.Logger, error) {
 	env := cf.GetEnv()
 
 	// configs default

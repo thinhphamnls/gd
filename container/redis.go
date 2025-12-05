@@ -26,7 +26,7 @@ type redisProvider struct {
 	sugar       *zap.SugaredLogger
 }
 
-func NewRedis(cf gdconfig.IBaseConfig, zap gdlogger.IBaseLogger) (IRedisProvider, func(), error) {
+func NewRedis(cf gdconfig.BaseConfig, zap gdlogger.IBaseLogger) (IRedisProvider, func(), error) {
 	var (
 		data    = &redisProvider{sugar: zap.Get()}
 		err     error

@@ -30,7 +30,7 @@ type databaseProvider struct {
 	gdMain, gdSlave *gorm.DB
 }
 
-func NewDatabase(cf gdconfig.IBaseConfig, zap gdlogger.IBaseLogger) (IDataBaseProvider, func(), error) {
+func NewDatabase(cf gdconfig.BaseConfig, zap gdlogger.IBaseLogger) (IDataBaseProvider, func(), error) {
 	var (
 		data = &databaseProvider{}
 

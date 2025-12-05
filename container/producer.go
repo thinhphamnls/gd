@@ -22,7 +22,7 @@ type producer struct {
 	producerClient sarama.SyncProducer
 }
 
-func NewProducer(cf gdconfig.IBaseConfig, zap gdlogger.IBaseLogger, cfKfk *sarama.Config) (IProducer, error) {
+func NewProducer(cf gdconfig.BaseConfig, zap gdlogger.IBaseLogger, cfKfk *sarama.Config) (IProducer, error) {
 	producerClient, err := sarama.NewSyncProducer(cf.GetQueue().Brokers, cfKfk)
 	if err != nil {
 		return nil, fmt.Errorf("producer client init failed: %s", err)
