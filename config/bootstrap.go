@@ -4,18 +4,8 @@ import "sync"
 
 var (
 	instance *BaseConfig
-	onceInit sync.Once
 	onceLoad sync.Once
 )
-
-type IBaseConfig interface {
-	GetEnv() Env
-	GetServer() Server
-	GetDatabase() Database
-	GetCache() Cache
-	GetTime() Time
-	GetQueue() Queue
-}
 
 type BaseConfig struct {
 	env      Env
@@ -26,11 +16,8 @@ type BaseConfig struct {
 	queue    Queue
 }
 
-func InitBase() IBaseConfig {
-	onceInit.Do(func() {
-		instance = &BaseConfig{}
-	})
-	return instance
+func Init() BaseConfig {
+	return BaseConfig{}
 }
 
 func Load(f func(c *BaseConfig)) {
