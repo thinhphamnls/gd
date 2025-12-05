@@ -1,5 +1,12 @@
 package gdconfig
 
+import "sync"
+
+var (
+	once     sync.Once
+	instance *BaseConfig
+)
+
 type IBaseConfig interface {
 	GetEnv() Env
 	GetServer() Server
@@ -19,7 +26,11 @@ type BaseConfig struct {
 }
 
 func Init() IBaseConfig {
-	return &BaseConfig{}
+	once.Do(func() {
+		instance = &BaseConfig{}
+	})
+
+	return instance
 }
 
 type Server struct {
