@@ -35,21 +35,22 @@ func NewProducer(cf gdconfig.BaseConfig, zap gdlogger.IBaseLogger, cfKfk *sarama
 }
 
 func (p producer) PushMessage(topic string, mgs string) error {
+	messageId := uuid.NewString()
 	message := &sarama.ProducerMessage{
 		Topic:     topic,
 		Value:     sarama.StringEncoder(mgs),
 		Timestamp: time.Now().UTC(),
 		Headers: []sarama.RecordHeader{
-			{Key: []byte("message_id"), Value: []byte(uuid.NewString())},
+			{Key: []byte("message_id"), Value: []byte(messageId)},
 		},
 	}
 
 	partition, offset, err := p.producerClient.SendMessage(message)
 	if err != nil {
-		p.sugar.Warnf("partition: %d, offset: %d", partition, offset)
 		return fmt.Errorf("send message to kafka failed, %v", err)
 	}
 
+	p.sugar.Infof("Message published MessageId: %v Partition: %d Offset: %d", messageId, partition, offset)
 	return nil
 }
 
