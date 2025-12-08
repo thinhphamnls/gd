@@ -75,7 +75,6 @@ type Time struct {
 type Queue struct {
 	Brokers []string
 	Topic   string
-	GroupId string
 }
 
 func (c *BaseConfig) GetEnv() Env           { return c.env }
