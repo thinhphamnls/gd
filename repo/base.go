@@ -15,11 +15,11 @@ type IQuery interface {
 }
 
 type BaseRepo[T any] struct {
-	db    gdcontainer.IDataBaseProvider
+	db    gdcontainer.DataBaseProvider
 	sugar *zap.SugaredLogger
 }
 
-func NewBaseRepo[T any](db gdcontainer.IDataBaseProvider, sugar *zap.SugaredLogger) *BaseRepo[T] {
+func NewBaseRepo[T any](db gdcontainer.DataBaseProvider, sugar *zap.SugaredLogger) *BaseRepo[T] {
 	return &BaseRepo[T]{
 		db:    db,
 		sugar: sugar,
@@ -28,7 +28,7 @@ func NewBaseRepo[T any](db gdcontainer.IDataBaseProvider, sugar *zap.SugaredLogg
 
 func (r *BaseRepo[T]) List(param IQuery, table string) ([]*T, bool, error) {
 	var (
-		tx     = r.db.GDSlave()
+		tx     = r.db.Slave()
 		result []*T
 	)
 
@@ -45,7 +45,7 @@ func (r *BaseRepo[T]) List(param IQuery, table string) ([]*T, bool, error) {
 
 func (r *BaseRepo[T]) Get(param IQuery, table string) (*T, bool, error) {
 	var (
-		tx     = r.db.GDSlave()
+		tx     = r.db.Slave()
 		result *T
 	)
 

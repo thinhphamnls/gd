@@ -17,7 +17,7 @@ const (
 	redisMaxRetries      = 10
 )
 
-type IRedisProvider interface {
+type RedisProvider interface {
 	Get() *redis.Client
 }
 
@@ -26,11 +26,10 @@ type redisProvider struct {
 	sugar       *zap.SugaredLogger
 }
 
-func NewRedis(cf gdconfig.BaseConfig, zap gdlogger.IBaseLogger) (IRedisProvider, func(), error) {
+func NewRedis(cf gdconfig.Redis, zap gdlogger.ZapLoggerProvider) (RedisProvider, func(), error) {
 	var (
-		data    = &redisProvider{sugar: zap.Get()}
-		err     error
-		cfRedis = cf.GetCache()
+		data = &redisProvider{sugar: zap.Get()}
+		err  error
 	)
 
 	cleanup := func() {
@@ -41,8 +40,8 @@ func NewRedis(cf gdconfig.BaseConfig, zap gdlogger.IBaseLogger) (IRedisProvider,
 		zap.Get().Info("cleanup and close redis")
 	}
 
-	if cfRedis.Redis.Host != "" {
-		data.redisClient, err = connectRedis(cfRedis.Redis)
+	if cf.Host != "" {
+		data.redisClient, err = connectRedis(cf)
 		if err != nil {
 			return nil, cleanup, err
 		}

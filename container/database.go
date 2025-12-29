@@ -13,31 +13,27 @@ import (
 )
 
 const (
-	dbConnMaxLifetime = 3 * time.Minute
+	dbConnMaxLifetime = 60 * time.Minute
 )
 
 const (
 	DefaultSchemaGorillaDesk = "gorilladesk"
 )
 
-type IDataBaseProvider interface {
-	GDMain() *gorm.DB
-	GDSlave() *gorm.DB
+type DataBaseProvider interface {
+	Main() *gorm.DB
+	Slave() *gorm.DB
 	Transaction(fc func(tx *gorm.DB) error) (err error)
 }
 
 type databaseProvider struct {
-	gdMain, gdSlave *gorm.DB
+	main, slave *gorm.DB
 }
 
-func NewDatabase(cf gdconfig.BaseConfig, zap gdlogger.IBaseLogger) (IDataBaseProvider, func(), error) {
+func NewDatabase(cfMain gdconfig.DbConfig, cfSlave gdconfig.DbConfig, zap gdlogger.ZapLoggerProvider) (DataBaseProvider, func(), error) {
 	var (
 		data = &databaseProvider{}
-
-		cfGDMain  = cf.GetDatabase().GDMain
-		cfGDSlave = cf.GetDatabase().GDSlave
-
-		err error
+		err  error
 	)
 
 	cleanup := func() {
@@ -50,21 +46,21 @@ func NewDatabase(cf gdconfig.BaseConfig, zap gdlogger.IBaseLogger) (IDataBasePro
 			}
 		}
 
-		closeDB(data.gdMain)
-		closeDB(data.gdSlave)
+		closeDB(data.main)
+		closeDB(data.slave)
 
 		zap.Get().Info("closing the db repo resources")
 	}
 
-	if cfGDMain.Host != "" {
-		data.gdMain, err = connect(cfGDMain, zap)
+	if cfMain.Host != "" {
+		data.main, err = connect(cfMain, zap)
 		if err != nil {
 			return data, cleanup, err
 		}
 	}
 
-	if cfGDSlave.Host != "" {
-		data.gdSlave, err = connect(cfGDSlave, zap)
+	if cfSlave.Host != "" {
+		data.slave, err = connect(cfSlave, zap)
 		if err != nil {
 			return data, cleanup, err
 		}
@@ -73,7 +69,7 @@ func NewDatabase(cf gdconfig.BaseConfig, zap gdlogger.IBaseLogger) (IDataBasePro
 	return data, cleanup, nil
 }
 
-func connect(cf gdconfig.DbConfig, zap gdlogger.IBaseLogger) (*gorm.DB, error) {
+func connect(cf gdconfig.DbConfig, zap gdlogger.ZapLoggerProvider) (*gorm.DB, error) {
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=UTC",
 		cf.Host, cf.Username, cf.Password, cf.DBName, cf.Port)
 
@@ -101,17 +97,17 @@ func connect(cf gdconfig.DbConfig, zap gdlogger.IBaseLogger) (*gorm.DB, error) {
 	return db, nil
 }
 
-func (p *databaseProvider) GDMain() *gorm.DB {
-	return p.gdMain.Session(&gorm.Session{SkipHooks: false})
+func (p *databaseProvider) Main() *gorm.DB {
+	return p.main.Session(&gorm.Session{SkipHooks: false})
 }
 
-func (p *databaseProvider) GDSlave() *gorm.DB {
-	return p.gdSlave.Session(&gorm.Session{SkipHooks: false})
+func (p *databaseProvider) Slave() *gorm.DB {
+	return p.slave.Session(&gorm.Session{SkipHooks: false})
 }
 
 func (p *databaseProvider) Transaction(fc func(tx *gorm.DB) error) (err error) {
 	panicked := true
-	tx := p.gdMain.Begin()
+	tx := p.main.Begin()
 
 	defer func() {
 		if panicked || err != nil {
@@ -119,7 +115,7 @@ func (p *databaseProvider) Transaction(fc func(tx *gorm.DB) error) (err error) {
 		}
 	}()
 
-	txRep := p.gdMain
+	txRep := p.main
 	txRep = tx
 	err = fc(txRep)
 

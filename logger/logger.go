@@ -25,7 +25,7 @@ const (
 	slowThreshold = 2000
 )
 
-type IBaseLogger interface {
+type ZapLoggerProvider interface {
 	Get() *zap.SugaredLogger
 	LogMode(level gormLogger.LogLevel) gormLogger.Interface
 	Info(ctx context.Context, msg string, data ...interface{})
@@ -34,11 +34,11 @@ type IBaseLogger interface {
 	Trace(ctx context.Context, begin time.Time, fc func() (string, int64), err error)
 }
 
-type BaseLogger struct {
-	Zap *zap.SugaredLogger
+type ZapLogger struct {
+	zap *zap.SugaredLogger
 }
 
-func Init(cf gdconfig.BaseConfig) IBaseLogger {
+func Init(cf gdconfig.Env) ZapLoggerProvider {
 	zapLogger, err := build(cf)
 	defer func() {
 		_ = zapLogger.Sync()
@@ -47,13 +47,10 @@ func Init(cf gdconfig.BaseConfig) IBaseLogger {
 	if err != nil {
 		log.Fatalf("init zap logger failed: %v", err)
 	}
-
-	return &BaseLogger{Zap: zapLogger.Sugar()}
+	return &ZapLogger{zap: zapLogger.Sugar()}
 }
 
-func build(cf gdconfig.BaseConfig) (*zap.Logger, error) {
-	env := cf.GetEnv()
-
+func build(cf gdconfig.Env) (*zap.Logger, error) {
 	// configs default
 	cfg := zap.Config{
 		Encoding:    "json",
@@ -74,7 +71,7 @@ func build(cf gdconfig.BaseConfig) (*zap.Logger, error) {
 		},
 	}
 
-	if env.Mode != "production" {
+	if cf.Mode != "production" {
 		cfg.Level = zap.NewAtomicLevelAt(zapcore.InfoLevel)
 	}
 
@@ -82,27 +79,27 @@ func build(cf gdconfig.BaseConfig) (*zap.Logger, error) {
 	return zapLogger, err
 }
 
-func (l BaseLogger) Get() *zap.SugaredLogger {
-	return l.Zap
+func (l ZapLogger) Get() *zap.SugaredLogger {
+	return l.zap
 }
 
-func (l BaseLogger) LogMode(_ gormLogger.LogLevel) gormLogger.Interface {
+func (l ZapLogger) LogMode(_ gormLogger.LogLevel) gormLogger.Interface {
 	return l
 }
 
-func (l BaseLogger) Info(_ context.Context, msg string, data ...interface{}) {
-	l.Zap.Infof(messageFormat, append([]interface{}{msg, gormUtils.FileWithLineNum()}, data...)...)
+func (l ZapLogger) Info(_ context.Context, msg string, data ...interface{}) {
+	l.zap.Infof(messageFormat, append([]interface{}{msg, gormUtils.FileWithLineNum()}, data...)...)
 }
 
-func (l BaseLogger) Warn(_ context.Context, msg string, data ...interface{}) {
-	l.Zap.Warnf(messageFormat, append([]interface{}{msg, gormUtils.FileWithLineNum()}, data...)...)
+func (l ZapLogger) Warn(_ context.Context, msg string, data ...interface{}) {
+	l.zap.Warnf(messageFormat, append([]interface{}{msg, gormUtils.FileWithLineNum()}, data...)...)
 }
 
-func (l BaseLogger) Error(_ context.Context, msg string, data ...interface{}) {
-	l.Zap.Errorf(messageFormat, append([]interface{}{msg, gormUtils.FileWithLineNum()}, data...)...)
+func (l ZapLogger) Error(_ context.Context, msg string, data ...interface{}) {
+	l.zap.Errorf(messageFormat, append([]interface{}{msg, gormUtils.FileWithLineNum()}, data...)...)
 }
 
-func (l BaseLogger) Trace(_ context.Context, begin time.Time, fc func() (string, int64), err error) {
+func (l ZapLogger) Trace(_ context.Context, begin time.Time, fc func() (string, int64), err error) {
 	elapsed := time.Since(begin)
 
 	switch {

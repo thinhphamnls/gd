@@ -13,7 +13,7 @@ import (
 
 const DefaultLanguage = "en"
 
-type II18nProvider interface {
+type I18nProvider interface {
 	Localize(lang string) *i18n.Localizer
 	Translate(lang, category, messageId string, data map[string]interface{}) string
 }
@@ -23,7 +23,7 @@ type i18nProvider struct {
 	defaultLang string
 }
 
-func NewI18nProvider(zap *zap.SugaredLogger, dirPath string) (II18nProvider, func(), error) {
+func NewI18nProvider(zap *zap.SugaredLogger, dirPath string) (I18nProvider, func(), error) {
 	bundle := i18n.NewBundle(language.English)
 	bundle.RegisterUnmarshalFunc("json", json.Unmarshal)
 

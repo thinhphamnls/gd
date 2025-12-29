@@ -1,47 +1,12 @@
 package gdconfig
 
-import "sync"
-
-var (
-	instance *BaseConfig
-	onceInit sync.Once
-	onceLoad sync.Once
-)
-
-type BaseConfig struct {
-	env      Env
-	server   Server
-	database Database
-	cache    Cache
-	timer    Time
-	queue    Queue
-}
-
-func Init() *BaseConfig {
-	onceInit.Do(func() {
-		instance = &BaseConfig{}
-	})
-	return instance
-}
-
-func Load(f func(c *BaseConfig)) {
-	onceLoad.Do(func() {
-		f(instance)
-	})
+type Env struct {
+	Mode string
 }
 
 type Server struct {
 	Address string
 	Timeout int
-}
-
-type Env struct {
-	Mode string
-}
-
-type Database struct {
-	GDMain  DbConfig
-	GDSlave DbConfig
 }
 
 type DbConfig struct {
@@ -54,10 +19,6 @@ type DbConfig struct {
 	MaxIdleCon int
 }
 
-type Cache struct {
-	Redis Redis
-}
-
 type Redis struct {
 	Host         string
 	Port         string
@@ -68,37 +29,11 @@ type Redis struct {
 	WriteTimeout int
 }
 
-type Time struct {
-	Zone string
-}
-
-type Queue struct {
+type Kafka struct {
 	Brokers []string
 	Topic   string
 }
 
-func (c *BaseConfig) GetEnv() Env           { return c.env }
-func (c *BaseConfig) GetServer() Server     { return c.server }
-func (c *BaseConfig) GetDatabase() Database { return c.database }
-func (c *BaseConfig) GetCache() Cache       { return c.cache }
-func (c *BaseConfig) GetTime() Time         { return c.timer }
-func (c *BaseConfig) GetQueue() Queue       { return c.queue }
-
-func (c *BaseConfig) SetEnv(env Env) {
-	c.env = env
-}
-func (c *BaseConfig) SetServer(s Server) {
-	c.server = s
-}
-func (c *BaseConfig) SetDatabase(db Database) {
-	c.database = db
-}
-func (c *BaseConfig) SetCache(cache Cache) {
-	c.cache = cache
-}
-func (c *BaseConfig) SetTime(t Time) {
-	c.timer = t
-}
-func (c *BaseConfig) SetQueue(q Queue) {
-	c.queue = q
+type Time struct {
+	Zone string
 }

@@ -12,7 +12,7 @@ import (
 	"github.com/thinhphamnls/gd/logger"
 )
 
-type IProducer interface {
+type KafkaProducer interface {
 	PushMessage(topic string, mgs string) error
 	Close()
 }
@@ -22,8 +22,8 @@ type producer struct {
 	producerClient sarama.SyncProducer
 }
 
-func NewProducer(cf gdconfig.BaseConfig, zap gdlogger.IBaseLogger, cfKfk *sarama.Config) (IProducer, error) {
-	producerClient, err := sarama.NewSyncProducer(cf.GetQueue().Brokers, cfKfk)
+func NewProducer(cf gdconfig.Kafka, zap gdlogger.ZapLoggerProvider, cfProducer *sarama.Config) (KafkaProducer, error) {
+	producerClient, err := sarama.NewSyncProducer(cf.Brokers, cfProducer)
 	if err != nil {
 		return nil, fmt.Errorf("producer client init failed: %s", err)
 	}
@@ -50,7 +50,7 @@ func (p producer) PushMessage(topic string, mgs string) error {
 		return fmt.Errorf("send message to kafka failed, %v", err)
 	}
 
-	p.sugar.Infof("Message published MessageId: %v Partition: %d Offset: %d", messageId, partition, offset)
+	p.sugar.Debugf("Message published MessageId: %v Partition: %d Offset: %d", messageId, partition, offset)
 	return nil
 }
 
