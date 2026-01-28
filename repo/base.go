@@ -34,7 +34,9 @@ func (r *BaseRepo[T]) List(param IQuery, table string) ([]*T, bool, error) {
 
 	tx = param.BuildQuery(tx)
 
-	if err := tx.Table(table).
+	if err := tx.
+		Debug().
+		Table(table).
 		Find(&result).
 		Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, false, err
