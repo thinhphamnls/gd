@@ -72,7 +72,7 @@ func build(cf gdconfig.Env) (*zap.Logger, error) {
 	}
 
 	if cf.Mode != "production" {
-		cfg.Level = zap.NewAtomicLevelAt(zapcore.InfoLevel)
+		cfg.Level = zap.NewAtomicLevelAt(zapcore.DebugLevel)
 	}
 
 	zapLogger, err := cfg.Build()
