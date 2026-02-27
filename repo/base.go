@@ -26,10 +26,10 @@ func NewBaseRepo[T any](db gdcontainer.DataBaseProvider, sugar *zap.SugaredLogge
 	}
 }
 
-func (r *BaseRepo[T]) List(param IQuery, table string) ([]*T, bool, error) {
+func (r *BaseRepo[T]) List(param IQuery, table string) ([]T, bool, error) {
 	var (
 		tx     = r.db.Slave()
-		result []*T
+		result []T
 	)
 
 	tx = param.BuildQuery(tx)
