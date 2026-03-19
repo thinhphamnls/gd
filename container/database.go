@@ -49,7 +49,7 @@ func NewDatabase(cfMain gdconfig.DbConfig, cfSlave gdconfig.DbConfig, zap gdlogg
 		closeDB(data.main)
 		closeDB(data.slave)
 
-		zap.Get().Info("closing the db repo resources")
+		zap.Get().Info("closing the db repo resources.")
 	}
 
 	if cfMain.Host != "" {
