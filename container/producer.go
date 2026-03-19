@@ -13,7 +13,7 @@ import (
 )
 
 type KafkaProducer interface {
-	PushMessage(topic string, mgs string) error
+	PushMessage(topic string, mgs string, key string) error
 	Close()
 }
 
@@ -34,11 +34,12 @@ func NewProducer(cf gdconfig.Kafka, zap gdlogger.ZapLoggerProvider, cfProducer *
 	}, nil
 }
 
-func (p producer) PushMessage(topic string, mgs string) error {
+func (p producer) PushMessage(topic string, mgs string, key string) error {
 	messageId := uuid.NewString()
 	message := &sarama.ProducerMessage{
 		Topic:     topic,
 		Value:     sarama.StringEncoder(mgs),
+		Key:       sarama.StringEncoder(key),
 		Timestamp: time.Now().UTC(),
 		Headers: []sarama.RecordHeader{
 			{Key: []byte("message_id"), Value: []byte(messageId)},
