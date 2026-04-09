@@ -17,6 +17,7 @@ type DbConfig struct {
 	Password   string
 	MaxCon     int
 	MaxIdleCon int
+	EnableSSL  bool
 }
 
 type Redis struct {

@@ -70,8 +70,15 @@ func NewDatabase(cfMain gdconfig.DbConfig, cfSlave gdconfig.DbConfig, zap gdlogg
 }
 
 func connect(cf gdconfig.DbConfig, zap gdlogger.ZapLoggerProvider) (*gorm.DB, error) {
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=UTC",
-		cf.Host, cf.Username, cf.Password, cf.DBName, cf.Port)
+	sslMode := "disable"
+	if cf.EnableSSL {
+		sslMode = "require"
+	}
+
+	dsn := fmt.Sprintf(
+		"host=%s user=%s password=%s dbname=%s port=%s sslmode=%s TimeZone=UTC",
+		cf.Host, cf.Username, cf.Password, cf.DBName, cf.Port, sslMode,
+	)
 
 	db, err := gorm.Open(postgres.New(postgres.Config{
 		DSN:                  dsn,
